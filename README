@@ -1,0 +1,73 @@
+Clasa Producer:
+-in constructor, pe langa initializarea parametrilor deja existenti, am adaugat
+si id-ul producatorului;
+-producatorii produc in continuu. Simulez timpul de producere al unui produs
+folosindu-ma de variabila "sleep_time".
+-"bool_pub" imi returneaza True daca pot sa public un produs, dupa care scad
+cantitatea, altfel astept un timp pentru a reincerca publicarea;
+
+Clasa Consumer:
+-fiecarui cos ii atribui un id. Acest id mi-l va returna
+functia "new_cart()";
+-iterez prin cos pentru a afla ce operatii efectueaza:
+        -daca am operatia de adaugare, atunci apelez "add_to_cart()". Daca pot
+        sa ii asigur produsele, scad cantitatea, altfel il pun sa mai 
+        astepte un timp si sa reincerce sa adauge produsul in cos;
+        -daca am operatia de stergere, apelez functia corespunzatoare si scad 
+        cantitatea atata timp cat aceasta are o valoare pozitiva;
+-la final iterez prin produse si le afisez;
+
+Clasa Marketplace:
+-am folosit "id_prod" si "cart_id" pentru a atribui id-uri producatorilor si
+cosurilor;
+-am folosit dictionar pentru producatori si contorul fiecaruia, cu ajutorul 
+caruia poate publica (producer_dict);
+-dictionarul de produse "products_dict" are ca si cheie produsul si ca 
+valoare o lista de doua elemente cu cantitatea si producatorul caruia 
+ii apartine produsul;
+-"cart_dict" este un dictionar care are ca si cheie id-ul cosului si ca valoare 
+un alt dictionar format din cheia id produsului si valoarea cantitatea;
+-functia "register_producer()" imi va returna un id pentru fiecare producator. 
+Pe variabila corespunzatoare id-ului producatorului va trebui sa pun un lock
+deoarece poate fi accesata de mai multi producatori. 
+Initializez la 0 variabila folosita pentru contorizarea produselor 
+corespunzatoare unui producator. Cand aceasta ajunge la valoarea maxima data
+in fisierele de intrare, producatorul nu va mai putea sa publice;
+-functia "publish()" imi permite adaugarea de produse pana la valoarea maxima:
+        -daca produsul exista deja, ii cresc cantitatea, incrementand valoarea 
+        de pe prima pozitie din lista continuta in dictionarul 
+        anterior mentionat (products_dict); 
+        -altfel, daca produsul nu exista, acesta va fi adaugat, iar cantitatea 
+        va deveni 1;
+        -initializez elementul al doilea din lista anterioara cu id-ul 
+        producatorului curent pentru a sti ce produs corespunde fiecarui 
+        producator;
+        -va fi nevoie de un lock pe produse deoarece pot actiona atat 
+        producatorii cat si consumatorii asupra lor;
+        -la final, cresc valoarea contorului de produse corespunzatoare 
+        producatorului. Aceasta va trebui protejata printr-un lock deoarece
+        poate fi modificata de mai multi producatori odata si, de asemenea, 
+        mai multi consumatori o pot altera atunci cand adauga/ sterg din cos;
+-"new_cart()" imi atribuie id fiecarui cos. Initial, in cos nu am produse. 
+Folosesc un lock deoarece mai multi consumatori pot sa ceara un cos la un 
+moment dat si astfel, variabila de atribuire a id-urilor poate fi alterata 
+de mai multi consumatori odata. 
+-functia "add_to_cart()" verifica initial daca am produsul respectiv in market 
+si daca produsul e in market, dar are cantitate 0.
+        -daca produsul e in market, si cantitatea e pozitiva, atunci ii scad 
+        cantitatea. Pun un lock pe aceste operatii deoarece mai multi 
+        consumatori vor adauga in cos la un moment dat;
+        -scad cantitatea din contorul de produse al producatorului, folosind 
+        lock pt aceasta operatie;
+        -daca am deja produsul in cos ii cresc cantitatea, altfel cantitatea 
+        devine 1;
+-"remove_from_cart()" imi sterge produsul din cos daca acesta exista. 
+Deoarece produsul a fost sters din cos va trebui sa il adaug din nou la cantitatea
+corespunzatoare produsului si la contorul producatorlui. Operatiile acestea 
+vor fi protejate de lock deoarece un producator poate produce in acelasi
+timp in care un consumator sterge un produs din cos si contorul producatorului 
+poate fi afectat;
+-in "place_order()" voi avea o lista cu comanda consumatorului. 
+Adaug produsul la lista de comanda de ori cate ori exista in cos, ajutandu-ma de
+variabila "quantity". 
+La final inversez lista pentru a ma ajuta la afisare;
